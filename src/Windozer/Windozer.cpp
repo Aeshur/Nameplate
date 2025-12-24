@@ -15,6 +15,10 @@ If not, see <https://www.gnu.org/licenses/>.
 #include <windows.h>
 #include <strsafe.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "Windozer.h"
 
 #include "../Nameplate.h"
@@ -27,67 +31,69 @@ class WindozerNameplate : public PluginBase, private Nameplate {
 
             int ret = this->Init();
 
-			if (ret < 0) {
-		        ShowMessage(MESSAGE::PLUGIN_LOAD_ERROR, ret);
-			}
+            if (ret < 0) {
+                ShowMessage(MESSAGE::PLUGIN_LOAD_ERROR, ret);
+            }
         }
 
         virtual void __stdcall Unload() override {
             int ret = this->Deinit();
 
-			if (ret < 0) {
-				ShowMessage(MESSAGE::PLUGIN_UNLOAD_ERROR, ret);
-			}
+            if (ret < 0) {
+                ShowMessage(MESSAGE::PLUGIN_UNLOAD_ERROR, ret);
+            }
         }
-        virtual PluginMetadata* __stdcall GetMetadata(PluginMetadata* metadata) override;
 
-        virtual void __stdcall PluginCommand(const char* cmd, const char* name) override;
+        virtual const char* __stdcall GetPluginAuthor() override {
+            return "BunnyBox Productions";
+        }
 
-		virtual void Debug(const char* text) override {
-			pPluginManager->GetConsole()->Write(text);
-		}
+        virtual const char* __stdcall GetPluginName() override {
+            return "nameplate";
+        }
 
-		virtual bool GetConfigPath(wchar_t path[UNICODE_MAX_PATH]) override {
-			MMFSettingsHandler settings;
+        virtual void __stdcall PluginCommand(const char* cmd) override;
 
-			ZeroMemory(&settings, sizeof(settings));
-			pPluginManager->GetMMFSettingsHandler(&settings);
+        virtual void Debug(const char* text) override {
+            pPluginManager->GetConsole()->Write(text);
+        }
 
-			StringCchPrintfW(path, UNICODE_MAX_PATH, L"%S\\plugins\\settings", settings.WindowerPath);
-			return true;
-		}
+        virtual bool GetConfigPath(wchar_t path[UNICODE_MAX_PATH]) override {
+            MMFSettingsHandler settings;
 
-		virtual void ShowMessage(MESSAGE message, int param) override;
+            memset(&settings, 0, sizeof(settings));
+            pPluginManager->GetMMFSettingsHandler(&settings);
+
+            StringCchPrintfW(path, UNICODE_MAX_PATH, L"%S\\plugins\\settings", settings.WindowerPath);
+
+            return true;
+        }
+
+        virtual void ShowMessage(MESSAGE message, int param) override;
 };
 
-PluginMetadata* __stdcall WindozerNameplate::GetMetadata(PluginMetadata* metadata) {
-    StringCbCopyA(metadata->Author, sizeof(metadata->Author), "BunnyBox Productions");
-    StringCbCopyA(metadata->Name, sizeof(metadata->Name), "Nameplate");
-    return metadata;
-}
-
-void __stdcall WindozerNameplate::PluginCommand(const char* cmd, [[maybe_unused]] const char* name) {
-	ParseCommand(cmd, false);
+void __stdcall WindozerNameplate::PluginCommand(const char* cmd) {
+    ParseCommand(cmd, false);
 }
 
 typedef void (*ShowMessageCallback)(Console*, MESSAGE, int);
 
 static void WindozerPluginLoadError(Console* console, [[maybe_unused]] MESSAGE message, int param) {
-	char buf[1000];
+    char buf[1000];
 
-	StringCbPrintfA(buf, sizeof(buf), "\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Plugin load failed with error code \\cs(255,128,128)%d\\cs(255,128,255)!\\cr", param);
+    StringCbPrintfA(buf, sizeof(buf), "\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Plugin load failed with error code \\cs(255,128,128)%d\\cs(255,128,255)!\\cr", param);
     console->Write(buf);
 }
 
 static void WindozerPluginUnloadError(Console* console, [[maybe_unused]] MESSAGE message, int param) {
-	char buf[1000];
+    char buf[1000];
 
-	StringCbPrintfA(buf, sizeof(buf), "\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Plugin unload failed with error code \\cs(255,128,128)%d\\cs(255,128,255)!\\cr", param);
+    StringCbPrintfA(buf, sizeof(buf), "\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Plugin unload failed with error code \\cs(255,128,128)%d\\cs(255,128,255)!\\cr", param);
     console->Write(buf);
 }
 
 static void WindozerShortHelp(Console* console, [[maybe_unused]] MESSAGE message, [[maybe_unused]] int param) {
-	console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Unknown command, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
+    console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Unknown command, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
 }
 
 static void WindozerLongHelp(Console* console, [[maybe_unused]] MESSAGE message, [[maybe_unused]] int param) {
@@ -111,46 +117,46 @@ static void WindozerLongHelp(Console* console, [[maybe_unused]] MESSAGE message,
 }
 
 static void WindozerLoadError(Console* console, [[maybe_unused]] MESSAGE message, int param) {
-	char buf[1000];
+    char buf[1000];
 
-	StringCbPrintfA(buf, sizeof(buf), "\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Loading \\cs(255,255,192)plugins\\settings\\nameplate\\defaults.ini \\cs(255,128,128)failed with error code \\cs(255,128,128)%d\\cs(255,128,255)!\\cr", param);
+    StringCbPrintfA(buf, sizeof(buf), "\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Loading \\cs(255,255,192)plugins\\settings\\nameplate\\defaults.ini \\cs(255,128,128)failed with error code \\cs(255,128,128)%d\\cs(255,128,255)!\\cr", param);
     console->Write(buf);
 }
 
 static void WindozerSaveError(Console* console, [[maybe_unused]] MESSAGE message, int param) {
-	char buf[1000];
+    char buf[1000];
 
-	StringCbPrintfA(buf, sizeof(buf), "\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Save \\cs(255,255,192)plugins\\settings\\nameplate\\defaults.ini \\cs(255,128,128)failed with error code \\cs(255,128,128)%d\\cs(255,128,255)!\\cr", param);
+    StringCbPrintfA(buf, sizeof(buf), "\\cs(255,192,255)[Nameplate] \\cs(255,128,128)Save \\cs(255,255,192)plugins\\settings\\nameplate\\defaults.ini \\cs(255,128,128)failed with error code \\cs(255,128,128)%d\\cs(255,128,255)!\\cr", param);
     console->Write(buf);
 }
 
 static void WindozerLoadCommandError(Console* console, [[maybe_unused]] MESSAGE message, [[maybe_unused]] int param) {
-	console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate load \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
+    console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate load \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
 
 }
 
 static void WindozerSaveCommandError(Console* console, [[maybe_unused]] MESSAGE message, [[maybe_unused]] int param) {
-	console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate save \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
+    console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate save \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
 }
 
 static void WindozerFontSizeCommandError(Console* console, [[maybe_unused]] MESSAGE message, [[maybe_unused]] int param) {
-	console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate fontsize \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
+    console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate fontsize \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
 }
 
 static void WindozerDamageFontSizeCommandError(Console* console, [[maybe_unused]] MESSAGE message, [[maybe_unused]] int param) {
-	console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate damagefontsize \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
+    console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate damagefontsize \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
 }
 
 static void WindozerShowStarsCommandError(Console* console, [[maybe_unused]] MESSAGE message, [[maybe_unused]] int param) {
-	console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate showstars \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
+    console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate showstars \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
 }
 
 static void WindozerHideStarsCommandError(Console* console, [[maybe_unused]] MESSAGE message, [[maybe_unused]] int param) {
-	console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate hidestars \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
+    console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate hidestars \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
 }
 
 static void WindozerModeCommandError(Console* console, [[maybe_unused]] MESSAGE message, [[maybe_unused]] int param) {
-	console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate mode \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
+    console->Write("\\cs(255,192,255)[Nameplate] \\cs(255,255,192)//nameplate mode \\cs(255,128,128)command error, please consult \\cs(255,255,192)//nameplate help \\cs(255,128,128) for more information.\\cr");
 }
 
 static constexpr ShowMessageCallback WindozerMessages[/*MESSAGE::MESSAGE_MAX*/] = {
@@ -173,8 +179,8 @@ void WindozerNameplate::ShowMessage(MESSAGE message, int param) {
     if ((uint32_t) message < (uint32_t) MESSAGE::MESSAGE_MAX && WindozerMessages[(uint32_t) message] != nullptr) {
         WindozerMessages[(uint32_t) message](pPluginManager->GetConsole(), message, param);
     } else {
-		char buf[1000];
-		StringCbPrintfA(buf, sizeof(buf), "[Nameplate] Unknown message %u (%d)\\cr", (uint32_t) message, param);
+        char buf[1000];
+        StringCbPrintfA(buf, sizeof(buf), "[Nameplate] Unknown message %u (%d)\\cr", (uint32_t) message, param);
         pPluginManager->GetConsole()->Write(buf);
     }
 }
