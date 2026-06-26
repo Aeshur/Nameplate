@@ -19,7 +19,7 @@ set(ASHITA_SDK_PATH "../Ashita-v3/plugins" CACHE STRING "Ashita SDK Path")
 # ASHITA_V4 (also includes Windozer) (default)
 # WINDOWER_V4 (please reach out so that this can happen in a way agreeable to all, especially your users)
 set(TARGET_PLATFORMS "ASHITA_V3" "ASHITA_V4" "WINDOWER_V4")
-set(TARGET_PLATFORM "ASHITA_V3" CACHE STRING "Target Plugin Platform")
+set(TARGET_PLATFORM "ASHITA_V4" CACHE STRING "Target Plugin Platform")
 set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS TARGET_PLATFORMS)
 
 if(NOT TARGET_PLATFORM IN_LIST TARGET_PLATFORMS)
